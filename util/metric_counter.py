@@ -23,8 +23,8 @@ class MetricCounter:
         self.images = defaultdict(list)
 
     def add_losses(self, l_G, l_content, l_D=0):
-        for name, value in zip(('G_loss', 'G_loss_content', 'G_loss_adv', 'D_loss'),
-                               (l_G, l_content, l_G - l_content, l_D)):
+        for name, value in zip(('G_loss', 'G_loss_content', 'D_loss'),
+                               (l_G, l_content, l_D)):
             self.metrics[name].append(value)
 
     def add_metrics(self, psnr, ssim):

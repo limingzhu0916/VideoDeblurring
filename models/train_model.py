@@ -1,21 +1,24 @@
-from base_model import BaseModel
-import networks
+from .base_model import BaseModel
+from . import networks
 import torch
 from torch.autograd import Variable
-from loss import init_loss
+from .loss import init_loss
+import numpy as np
+from util.metrics import calculate_psnr
+from skimage.metrics import structural_similarity as SSIM
 
 class TrainModel(BaseModel):
     def name(self):
         return 'TrainModel'
 
     def __init__(self, opt):
-        BaseModel.__init__(self, opt)
+        super(TrainModel, self).__init__(opt)
         # define tensors
-        self.input_A = self.Tensor(opt.batchSize, opt.input_nc, opt.fineSize, opt.fineSize)
-        self.input_B = self.Tensor(opt.batchSize, opt.output_nc, opt.fineSize, opt.fineSize)
-        self.input_V = self.Tensor(opt.batchSize, opt.input_nc, opt.fineSize, opt.fineSize)
+        self.input_sharp = self.Tensor(opt.batchSize, opt.input_nc, opt.fineSize, opt.fineSize)
+        self.input_blur = self.Tensor(opt.batchSize, opt.output_nc, opt.fineSize, opt.fineSize)
+        # self.input_V = self.Tensor(opt.batchSize, opt.input_nc, opt.fineSize, opt.fineSize)
 
-        self.loss_names = ['G_GAN', 'G_L1', 'D_real+fake']
+        self.loss_names = ['G_GAN', 'G_Content', 'D']
         self.visual_names = ['real_A', 'fake_B', 'real_B']
 
         if self.isTrain:
@@ -26,7 +29,7 @@ class TrainModel(BaseModel):
         # define networks (both generator and discriminator)
         self.netG = networks.define_G(opt.input_nc, opt.output_nc, opt.ngf, opt.which_model_netG, opt.norm, not opt.no_dropout, opt.init_type, opt.init_gain, self.gpu_ids)
         if self.isTrain:  # define a discriminator
-            self.netD = networks.define_D(opt.output_nc, opt.ndf, opt.netD, opt.n_layers_D, opt.norm, opt.init_type, opt.init_gain, self.gpu_ids)
+            self.netD = networks.define_D(opt.output_nc, opt.ndf, opt.which_model_netD, opt.n_layers_D, opt.norm, opt.init_type, opt.init_gain, self.gpu_ids)
 
             self.old_lr = opt.lr
             # define loss functions
@@ -48,15 +51,15 @@ class TrainModel(BaseModel):
         """
         input_sharp = input['sharp'].to(self.device)
         input_blur = input['blur'].to(self.device)
-        self.input_A.resize_(input_sharp.size()).copy_(input_sharp)
-        self.input_B.resize_(input_blur.size()).copy_(input_blur)
+        self.input_sharp.resize_(input_sharp.size()).copy_(input_sharp)
+        self.input_blur.resize_(input_blur.size()).copy_(input_blur)
         self.image_paths = input['sharp_paths']
 
     def forward(self):
         """Run forward pass; called by both functions <optimize_parameters> and <test>."""
-        self.real_A = Variable(self.input_A)
+        self.real_A = Variable(self.input_blur)
         self.fake_B = self.netG.forward(self.real_A)
-        self.real_B = Variable(self.input_B)
+        self.real_B = Variable(self.input_sharp)
 
     # get image paths
     def get_image_paths(self):
@@ -99,3 +102,17 @@ class TrainModel(BaseModel):
             param_group['lr'] = lr
         print('update learning rate: %f -> %f' % (self.old_lr, lr))
         self.old_lr = lr
+
+    def tensor2im(self, image_tensor, imtype=np.uint8):
+        image_numpy = image_tensor[0].cpu().float().numpy()
+        image_numpy = (np.transpose(image_numpy, (1, 2, 0)) + 1) / 2.0 * 255.0
+        return image_numpy.astype(imtype)
+
+    def get_images_and_metrics(self) :
+        inp = self.tensor2im(self.real_A)
+        fake = self.tensor2im(self.fake_B)
+        real = self.tensor2im(self.real_B)
+        psnr = calculate_psnr(fake, real)
+        ssim = SSIM(fake, real)
+        vis_img = np.hstack((inp, fake, real))
+        return psnr, ssim, vis_img

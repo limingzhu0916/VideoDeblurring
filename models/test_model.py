@@ -1,8 +1,8 @@
-from base_model import BaseModel
-import networks
+from .base_model import BaseModel
+from . import networks
 import torch
 from torch.autograd import Variable
-from loss import init_loss
+from .loss import init_loss
 
 class TestModel(BaseModel):
     def name(self):

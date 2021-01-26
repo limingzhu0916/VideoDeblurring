@@ -1,9 +1,8 @@
 import os
 import torch
-from abc import ABC, abstractmethod
 from collections import OrderedDict
 
-class BaseModel(ABC):
+class BaseModel():
     """This class is an abstract base class (ABC) for models.
         To create a subclass, you need to implement the following five functions:
             -- <__init__>:                      initialize the class; first call BaseModel.__init__(self, opt).
@@ -38,23 +37,20 @@ class BaseModel(ABC):
         self.loss_names = []
         self.model_names = []
         self.visual_names = []
-        self.optimizers = []
+        # self.optimizers = []
 
-    @abstractmethod
     def set_input(self, input):
         """Unpack input data from the dataloader and perform necessary pre-processing steps.
 
                 Parameters:
                     input (dict): includes the data itself and its metadata information.
                 """
-        pass
+        self.input = input
 
-    @abstractmethod
     def forward(self):
         """Run forward pass; called by both functions <optimize_parameters> and <test>."""
         pass
 
-    @abstractmethod
     def optimize_parameters(self):
         """Calculate losses, gradients, and update network weights; called in every training iteration"""
         pass
@@ -78,7 +74,7 @@ class BaseModel(ABC):
     def update_learning_rate(self):
         pass
 
-    def save_network(self, epoch):
+    def save_networks(self, epoch):
         """Save all the networks to the disk.
 
         Parameters:
@@ -115,6 +111,20 @@ class BaseModel(ABC):
                     del state_dict._metadata
 
                 net.load_state_dict(state_dict)
+
+
+    def save_network(self, network, network_label, epoch_label, gpu_ids):
+        save_filename = '%s_net_%s.pth' % (epoch_label, network_label)
+        save_path = os.path.join(self.save_dir, save_filename)
+        torch.save(network.cpu().state_dict(), save_path)
+        if len(gpu_ids) and torch.cuda.is_available():
+            network.cuda(device=gpu_ids[0])
+
+
+    def load_network(self, network, network_label, epoch_label):
+        save_filename = '%s_net_%s.pth' % (epoch_label, network_label)
+        save_path = os.path.join(self.save_dir, save_filename)
+        network.load_state_dict(torch.load(save_path))
 
     def set_requires_grad(self, nets, requires_grad=False):
         """Set requies_grad=Fasle for all the networks to avoid unnecessary computations

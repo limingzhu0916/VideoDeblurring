@@ -1,5 +1,5 @@
-from train_model import TrainModel
-from test_model import TestModel
+from .train_model import TrainModel
+from .test_model import TestModel
 
 def create_model(opt):
     model = None

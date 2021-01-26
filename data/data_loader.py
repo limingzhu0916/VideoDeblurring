@@ -3,8 +3,8 @@ import torch.utils.data
 def CreateDataset(opt):
     dataset = None
     if opt.dataset_mode == 'train':
-        from data.train_data import DeblurDatset
-        dataset = DeblurDatset(opt)
+        from data.train_data import TrainDataset
+        dataset = TrainDataset(opt)
     # elif opt.dataset_mode == 'test':
         # from data.single_dataset import SingleDataset
         # dataset = SingleDataset()
@@ -15,8 +15,17 @@ def CreateDataset(opt):
     print("dataset [%s] was created" % (dataset.name()))
     return dataset
 
+class BaseDataLoader():
+    def __init__(self):
+        pass
+    def initialize(self, opt):
+        self.opt = opt
+        pass
+    def load_data():
+        return None
 
-class CustomDatasetDataLoader():
+
+class CustomDatasetDataLoader(BaseDataLoader):
     """Wrapper class of Dataset class that performs multi-threaded data loading"""
     def name(self):
         return 'CustomDatasetDataLoader'
@@ -38,10 +47,7 @@ class CustomDatasetDataLoader():
         )
 
     def load_data(self):
-        if self.dataset_mode == 'train':
-            return self.dataloader
-        else:
-            return self.dataloader
+        return self.dataloader
 
     def __len__(self):
         return len(self.dataset)
