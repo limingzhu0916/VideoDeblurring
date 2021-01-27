@@ -109,10 +109,10 @@ class TrainModel(BaseModel):
         return image_numpy.astype(imtype)
 
     def get_images_and_metrics(self) :
-        inp = self.tensor2im(self.real_A)
-        fake = self.tensor2im(self.fake_B)
-        real = self.tensor2im(self.real_B)
+        inp = self.tensor2im(self.real_A.data)
+        fake = self.tensor2im(self.fake_B.data)
+        real = self.tensor2im(self.real_B.data)
         psnr = calculate_psnr(fake, real)
-        ssim = SSIM(fake, real)
+        ssim = SSIM(fake, real, multichannel=True)
         vis_img = np.hstack((inp, fake, real))
         return psnr, ssim, vis_img

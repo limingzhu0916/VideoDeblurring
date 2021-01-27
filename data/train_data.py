@@ -5,6 +5,7 @@ import cv2
 from dataset.generate_kernel import generate_kernel_trajectory
 from scipy import signal
 import albumentations as albu
+import copy
 
 class TrainDataset(BaseDataset):
     def __init__(self, opt):
@@ -21,7 +22,7 @@ class TrainDataset(BaseDataset):
         data_path = self.data_paths[index]
         image = cv2.imread(data_path)
         sharp_patch = albu.RandomCrop(self.opt.fineSize, self.opt.fineSize, always_apply=True)(image=image)['image']
-        patch = cv2.normalize(sharp_patch, sharp_patch, alpha=-1, beta=1, norm_type=cv2.NORM_MINMAX, dtype=cv2.CV_32F)
+        sharp_patch = cv2.normalize(sharp_patch, sharp_patch, alpha=-1, beta=1, norm_type=cv2.NORM_MINMAX, dtype=cv2.CV_32F)
 
         init_angle = np.math.floor(np.random.uniform(0, 180))
         init_length = np.math.floor(np.random.uniform(0, self.kernel_size - 2))  # length=self.kernel_size will out of index, because of sub_pixel interpolation
@@ -35,12 +36,15 @@ class TrainDataset(BaseDataset):
         # patch_gamma[:, :, 2] = np.array(signal.fftconvolve(patch_gamma[:, :, 2], tmp_kernel, 'same'))
         # blur_patch = np.sign(patch_gamma) * (np.abs(patch_gamma)) ** (1 / self.gamma)
 
+        patch = copy.deepcopy(sharp_patch)
         patch[:, :, 0] = np.array(signal.fftconvolve(patch[:, :, 0], tmp_kernel, 'same'))
         patch[:, :, 1] = np.array(signal.fftconvolve(patch[:, :, 1], tmp_kernel, 'same'))
         patch[:, :, 2] = np.array(signal.fftconvolve(patch[:, :, 2], tmp_kernel, 'same'))
 
         blurred = cv2.normalize(patch, patch, alpha=-1, beta=1, norm_type=cv2.NORM_MINMAX, dtype=cv2.CV_32F)
 
+        sharp_patch = np.transpose(sharp_patch, (2, 0, 1))
+        blurred = np.transpose(blurred, (2, 0, 1))
         return {'sharp': sharp_patch, 'sharp_paths': data_path, 'blur': blurred}
 
     def __len__(self):
