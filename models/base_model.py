@@ -42,10 +42,10 @@ class BaseModel():
     def set_input(self, input):
         """Unpack input data from the dataloader and perform necessary pre-processing steps.
 
-                Parameters:
-                    input (dict): includes the data itself and its metadata information.
-                """
-        self.input = input
+        Parameters:
+            input (dict): includes the data itself and its metadata information.
+        """
+        pass
 
     def forward(self):
         """Run forward pass; called by both functions <optimize_parameters> and <test>."""

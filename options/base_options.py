@@ -39,7 +39,8 @@ class BaseOptions():
         self.parser.add_argument('--kernel_size', type=int, default=21, help='the size of kernel [21 | 31 | 41]')
         self.parser.add_argument('--serial_batches', action='store_true',
                                  help='if true, takes images in order to make batches, otherwise takes them randomly')
-
+        self.parser.add_argument('--max_dataset_size', type=int, default=float("inf"),
+                                 help='Maximum number of samples allowed per dataset. If the dataset directory contains more than max_dataset_size, only a subset is loaded.')
         self.initialized = True
 
     def parse(self):

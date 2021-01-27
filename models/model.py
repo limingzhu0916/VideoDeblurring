@@ -1,10 +1,10 @@
 from .train_model import TrainModel
-from .test_model import TestModel
 
 def create_model(opt):
     model = None
     if opt.model == 'test':
         assert (opt.dataset_mode == 'test')
+        from .test_model import TestModel
         model = TestModel(opt)
     else:
         model = TrainModel(opt)
