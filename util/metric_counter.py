@@ -38,7 +38,7 @@ class MetricCounter:
 
     def write_to_tensorboard(self, epoch_num, validation=False):
         scalar_prefix = 'Validation' if validation else 'Train'
-        for tag in ('G_loss', 'D_loss', 'G_loss_adv', 'G_loss_content', 'SSIM', 'PSNR'):
+        for tag in ('G_loss', 'D_loss', 'G_loss_content', 'SSIM', 'PSNR'):
             self.writer.add_scalar(f'{scalar_prefix}_{tag}', np.mean(self.metrics[tag]), global_step=epoch_num)
         for tag in self.images:
             imgs = self.images[tag]

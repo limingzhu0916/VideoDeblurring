@@ -17,13 +17,12 @@ for arg in vars(args):
 
 Laplacian_mask = np.mat([[0, -1, 0], [-1, 4, -1], [0, -1, 0]])
 
-def calculate_VL(image_path):
+def calculate_VL(image: np.ndarray):
     """
     Calculate the variance of the image Laplacian
-    :param image_path: the path of image
+    :param image: the input image
     :return: the variance
     """
-    image = cv2.imread(image_path)
     image_Laplacian = cv2.filter2D(image, -1, Laplacian_mask)
     image_VL = np.var(image_Laplacian)
     return image_VL
@@ -54,7 +53,8 @@ def main():
             sharp_frame = 0
             for idx in range(index, index + args.number):
                 data_path = data_paths[idx]
-                image_VL = calculate_VL(data_path)
+                image = cv2.imread(data_path)
+                image_VL = calculate_VL(image)
                 if image_VLmax <= image_VL:
                     image_VLmax = image_VL
                     sharp_frame = idx

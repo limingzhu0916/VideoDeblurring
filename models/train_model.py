@@ -7,6 +7,7 @@ import numpy as np
 from util.metrics import calculate_psnr
 from skimage.metrics import structural_similarity as SSIM
 
+
 class TrainModel(BaseModel):
     def name(self):
         return 'TrainModel'
@@ -31,17 +32,24 @@ class TrainModel(BaseModel):
         if self.isTrain:  # define a discriminator
             self.netD = networks.define_D(opt.output_nc, opt.ndf, opt.which_model_netD, opt.n_layers_D, opt.norm, opt.init_type, opt.init_gain, self.gpu_ids)
 
-            self.old_lr = opt.lr
+            self.old_lr_G = opt.lr_G
+            self.old_lr_D = opt.lr_D
             # define loss functions
             self.discLoss, self.contentLoss = init_loss(opt, self.Tensor)
             # initialize optimizers; schedulers will be automatically created by function <BaseModel.setup>.
-            self.optimizer_G = torch.optim.Adam(self.netG.parameters(), lr=opt.lr, betas=(opt.beta1, 0.999))
-            self.optimizer_D = torch.optim.Adam(self.netD.parameters(), lr=opt.lr, betas=(opt.beta1, 0.999))
+            self.optimizer_G = torch.optim.Adam(self.netG.parameters(), lr=opt.lr_G, betas=(opt.beta1, 0.999))
+            self.optimizer_D = torch.optim.Adam(self.netD.parameters(), lr=opt.lr_D, betas=(opt.beta1, 0.999))
 
             self.criticUpdates = 5 if opt.gan_type == 'wgan-gp' else 1
 
         if self.isTrain and opt.continue_train:
             self.load_networks(opt.which_epoch)
+
+        print('---------- Networks initialized -------------')
+        networks.print_network(self.netG)
+        if self.isTrain:
+            networks.print_network(self.netD)
+        print('-----------------------------------------------')
 
     def set_input(self, input):
         """Unpack input data from the dataloader and perform necessary pre-processing steps.
@@ -51,6 +59,7 @@ class TrainModel(BaseModel):
         """
         input_sharp = input['sharp'].to(self.device)
         input_blur = input['blur'].to(self.device)
+        self.sharp_patch_VL = input['sharp_patch_VL']
         self.input_sharp.resize_(input_sharp.size()).copy_(input_sharp)
         self.input_blur.resize_(input_blur.size()).copy_(input_blur)
         self.image_paths = input['sharp_paths']
@@ -70,10 +79,11 @@ class TrainModel(BaseModel):
         self.loss_D.backward(retain_graph=True)
 
     def backward_G(self):
+        """
+        The training objective is: GAN Loss + lambda_L1 * ||G(A)-B||_1
+        """
         self.loss_G_GAN = self.discLoss.get_g_loss(self.netD, self.real_A, self.fake_B)
-        # Second, G(A) = B
-        self.loss_G_Content = self.contentLoss.get_loss(self.fake_B, self.real_B) * self.opt.lambda_A
-
+        self.loss_G_Content = self.contentLoss.get_loss(self.fake_B, self.real_B) * self.sharp_patch_VL
         self.loss_G = self.loss_G_GAN + self.loss_G_Content
 
         self.loss_G.backward()
@@ -94,21 +104,25 @@ class TrainModel(BaseModel):
 
     def update_learning_rate(self):
         """Update learning rates for all the networks; called at the end of every epoch"""
-        lrd = self.opt.lr / self.opt.niter_decay
-        lr = self.old_lr - lrd
+        lrd_G = self.opt.lr_G / self.opt.niter_decay
+        lrd_D = self.opt.lr_D / self.opt.niter_decay
+        lr_G = self.old_lr_G - lrd_G
+        lr_D = self.old_lr_D - lrd_D
         for param_group in self.optimizer_D.param_groups:
-            param_group['lr'] = lr
+            param_group['lr'] = lr_D
         for param_group in self.optimizer_G.param_groups:
-            param_group['lr'] = lr
-        print('update learning rate: %f -> %f' % (self.old_lr, lr))
-        self.old_lr = lr
+            param_group['lr'] = lr_G
+        print('update netG learning rate: %f -> %f, update netD learning rate: %f -> %f' % (self.old_lr_G, lr_G, self.old_lr_D, lr_D))
+        self.old_lr_G = lr_G
+        self.old_lr_D = lr_D
+
 
     def tensor2im(self, image_tensor, imtype=np.uint8):
         image_numpy = image_tensor[0].cpu().float().numpy()
         image_numpy = (np.transpose(image_numpy, (1, 2, 0)) + 1) / 2.0 * 255.0
         return image_numpy.astype(imtype)
 
-    def get_images_and_metrics(self) :
+    def get_images_and_metrics(self):
         inp = self.tensor2im(self.real_A.data)
         fake = self.tensor2im(self.fake_B.data)
         real = self.tensor2im(self.real_B.data)

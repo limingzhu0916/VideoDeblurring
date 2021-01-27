@@ -17,7 +17,8 @@ isTrain: True
 kernel_size: 21
 lambda_A: 100.0
 lambda_B: 10.0
-lr: 0.0001
+lr_D: 0.0001
+lr_G: 5e-05
 max_dataset_size: inf
 model: content_gan
 nThreads: 2

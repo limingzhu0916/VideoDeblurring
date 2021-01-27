@@ -6,6 +6,7 @@ from dataset.generate_kernel import generate_kernel_trajectory
 from scipy import signal
 import albumentations as albu
 import copy
+from dataset.select_sharp_frames import calculate_VL
 
 class TrainDataset(BaseDataset):
     def __init__(self, opt):
@@ -22,6 +23,7 @@ class TrainDataset(BaseDataset):
         data_path = self.data_paths[index]
         image = cv2.imread(data_path)
         sharp_patch = albu.RandomCrop(self.opt.fineSize, self.opt.fineSize, always_apply=True)(image=image)['image']
+        sharp_patch_VL = calculate_VL(sharp_patch)
         sharp_patch = cv2.normalize(sharp_patch, sharp_patch, alpha=-1, beta=1, norm_type=cv2.NORM_MINMAX, dtype=cv2.CV_32F)
 
         init_angle = np.math.floor(np.random.uniform(0, 180))
@@ -45,7 +47,7 @@ class TrainDataset(BaseDataset):
 
         sharp_patch = np.transpose(sharp_patch, (2, 0, 1))
         blurred = np.transpose(blurred, (2, 0, 1))
-        return {'sharp': sharp_patch, 'sharp_paths': data_path, 'blur': blurred}
+        return {'sharp': sharp_patch, 'sharp_paths': data_path, 'blur': blurred, 'sharp_patch_VL': sharp_patch_VL}
 
     def __len__(self):
         return len(self.data_paths)

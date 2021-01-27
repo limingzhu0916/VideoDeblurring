@@ -15,7 +15,8 @@ class TrainOptions(BaseOptions):
         self.parser.add_argument('--niter', type=int, default=150, help='# of iter at starting learning rate')
         self.parser.add_argument('--niter_decay', type=int, default=150, help='# of iter to linearly decay learning rate to zero')
         self.parser.add_argument('--beta1', type=float, default=0.5, help='momentum term of adam')
-        self.parser.add_argument('--lr', type=float, default=0.0001, help='initial learning rate for adam')
+        self.parser.add_argument('--lr_G', type=float, default=0.00005, help='initial learning rate for adam')
+        self.parser.add_argument('--lr_D', type=float, default=0.0001, help='initial learning rate for adam')
         self.parser.add_argument('--pool_size', type=int, default=50,
                                  help='the size of image buffer that stores previously generated images')
         self.isTrain = True

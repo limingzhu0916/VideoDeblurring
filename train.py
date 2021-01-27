@@ -25,19 +25,18 @@ def train(opt, data_loader, model, visualizer):
             visualizer.add_losses(losses['G_GAN'], losses['G_Content'], losses['D'])
 
             curr_psnr, curr_ssim, img_for_vis = model.get_images_and_metrics()
-            visualizer.add_image(img_for_vis, tag='train')  # display images on tensorboard
-
+            if i == 1:
+                visualizer.add_image(img_for_vis, tag='train')  # display images on tensorboard
             visualizer.add_metrics(curr_psnr, curr_ssim)
 
         visualizer.write_to_tensorboard(epoch)
-
         model.save_networks('latest')
         if epoch % opt.save_epoch_freq == 0:  # cache our model every <save_epoch_freq> epochs
             print('saving the model at the end of epoch %d, iters %d' % (epoch, total_steps))
             model.save_networks(epoch)
 
         print('End of epoch %d / %d \t Time Taken: %d sec' % (
-        epoch, opt.n_epochs + opt.n_epochs_decay, time.time() - epoch_start_time))
+        epoch, opt.niter + opt.niter_decay, time.time() - epoch_start_time))
 
 if __name__ == '__main__':
     freeze_support()
