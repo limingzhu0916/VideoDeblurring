@@ -38,6 +38,9 @@ def train(opt, data_loader, model, visualizer):
         print('End of epoch %d / %d \t Time Taken: %d sec' % (
         epoch, opt.niter + opt.niter_decay, time.time() - epoch_start_time))
 
+        if epoch > opt.niter:
+            model.update_learning_rate()
+
 if __name__ == '__main__':
     freeze_support()
     opt = TrainOptions().parse()
