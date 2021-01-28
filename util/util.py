@@ -1,6 +1,6 @@
 import os
-
-
+import numpy as np
+from PIL import Image
 
 IMG_EXTENSIONS = [
     '.jpg', '.JPG', '.jpeg', '.JPEG',
@@ -34,3 +34,17 @@ def mkdirs(paths):
 def mkdir(path):
     if not os.path.exists(path):
         os.makedirs(path)
+
+def tensor2im(image_tensor, imtype=np.uint8):
+    image_numpy = image_tensor[0].cpu().float().numpy()
+    image_numpy = (np.transpose(image_numpy, (1, 2, 0)) + 1) / 2.0 * 255.0
+    return image_numpy.astype(imtype)
+
+def save_image(image_numpy, image_path):
+    image_pil = None
+    if image_numpy.shape[2] == 1:
+        image_numpy = np.reshape(image_numpy, (image_numpy.shape[0],image_numpy.shape[1]))
+        image_pil = Image.fromarray(image_numpy, 'L')
+    else:
+        image_pil = Image.fromarray(image_numpy)
+    image_pil.save(image_path)

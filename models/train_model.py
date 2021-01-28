@@ -6,6 +6,7 @@ from .loss import init_loss
 import numpy as np
 from util.metrics import calculate_psnr
 from skimage.metrics import structural_similarity as SSIM
+from util import util
 
 
 class TrainModel(BaseModel):
@@ -21,11 +22,7 @@ class TrainModel(BaseModel):
 
         self.loss_names = ['G_GAN', 'G_Content', 'D']
         self.visual_names = ['real_A', 'fake_B', 'real_B']
-
-        if self.isTrain:
-            self.model_names = ['G', 'D']
-        else:  # during test time, only load G
-            self.model_names = ['G']
+        self.model_names = ['G', 'D']
 
         # define networks (both generator and discriminator)
         self.netG = networks.define_G(opt.input_nc, opt.output_nc, opt.ngf, opt.which_model_netG, opt.norm, not opt.no_dropout, opt.init_type, opt.init_gain, self.gpu_ids)
@@ -116,16 +113,10 @@ class TrainModel(BaseModel):
         self.old_lr_G = lr_G
         self.old_lr_D = lr_D
 
-
-    def tensor2im(self, image_tensor, imtype=np.uint8):
-        image_numpy = image_tensor[0].cpu().float().numpy()
-        image_numpy = (np.transpose(image_numpy, (1, 2, 0)) + 1) / 2.0 * 255.0
-        return image_numpy.astype(imtype)
-
     def get_images_and_metrics(self):
-        inp = self.tensor2im(self.real_A.data)
-        fake = self.tensor2im(self.fake_B.data)
-        real = self.tensor2im(self.real_B.data)
+        inp = util.tensor2im(self.real_A.data)
+        fake = util.tensor2im(self.fake_B.data)
+        real = util.tensor2im(self.real_B.data)
         psnr = calculate_psnr(fake, real)
         ssim = SSIM(fake, real, multichannel=True)
         vis_img = np.hstack((inp, fake, real))

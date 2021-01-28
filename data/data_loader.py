@@ -5,10 +5,10 @@ def CreateDataset(opt):
     if opt.dataset_mode == 'train':
         from data.train_data import TrainDataset
         dataset = TrainDataset(opt)
-    # elif opt.dataset_mode == 'test':
-        # from data.single_dataset import SingleDataset
-        # dataset = SingleDataset()
-        # dataset.initialize(opt)
+    elif opt.dataset_mode == 'test':
+        from data.test_data import TestDataset
+        dataset = TestDataset()
+        dataset.initialize(opt)
     else:
         raise ValueError("Dataset [%s] not recognized." % opt.dataset_mode)
 
