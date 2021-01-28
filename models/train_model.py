@@ -56,7 +56,7 @@ class TrainModel(BaseModel):
         """
         input_sharp = input['sharp'].to(self.device)
         input_blur = input['blur'].to(self.device)
-        self.sharp_patch_VL = input['sharp_patch_VL']
+        self.sharp_patch_VL = input['sharp_patch_VL'].to(self.device)
         self.input_sharp.resize_(input_sharp.size()).copy_(input_sharp)
         self.input_blur.resize_(input_blur.size()).copy_(input_blur)
         self.image_paths = input['sharp_paths']

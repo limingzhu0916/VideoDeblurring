@@ -47,3 +47,8 @@ class MetricCounter:
                 self.writer.add_images(tag, imgs[:, :, :, ::-1].astype('float32') / 255, dataformats='NHWC',
                                        global_step=epoch_num)
                 self.images[tag] = []
+
+    def write_metrics_tensorboard(self, epoch_num, validation=False):
+        scalar_prefix = 'Validation' if validation else 'Train'
+        for tag in ('SSIM', 'PSNR'):
+            self.writer.add_scalar(f'{scalar_prefix}_{tag}', np.mean(self.metrics[tag]), global_step=epoch_num)

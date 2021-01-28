@@ -1,6 +1,7 @@
 import os
 import numpy as np
 from PIL import Image
+import cv2
 
 IMG_EXTENSIONS = [
     '.jpg', '.JPG', '.jpeg', '.JPEG',
@@ -40,11 +41,16 @@ def tensor2im(image_tensor, imtype=np.uint8):
     image_numpy = (np.transpose(image_numpy, (1, 2, 0)) + 1) / 2.0 * 255.0
     return image_numpy.astype(imtype)
 
-def save_image(image_numpy, image_path):
+def save_image(image_numpy, save_dir, image_path):
     image_pil = None
+    name = os.path.split(image_path[0])[1]
+    save_dir = os.path.join(save_dir, name)
+    """
     if image_numpy.shape[2] == 1:
         image_numpy = np.reshape(image_numpy, (image_numpy.shape[0],image_numpy.shape[1]))
         image_pil = Image.fromarray(image_numpy, 'L')
     else:
         image_pil = Image.fromarray(image_numpy)
-    image_pil.save(image_path)
+    image_pil.save(save_dir)
+    """
+    cv2.imwrite(save_dir, image_numpy)

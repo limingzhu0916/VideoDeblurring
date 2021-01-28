@@ -34,7 +34,7 @@ def train(opt, data_loader, model, visualizer):
             for i, data in enumerate(validation):
                 val_psnr, val_ssim = model.test_validation(data)
                 visualizer.add_metrics(val_psnr, val_ssim)
-            visualizer.write_to_tensorboard(epoch, validation=True)
+            visualizer.write_metrics_tensorboard(epoch, validation=True)
 
         model.save_networks('latest')
         if epoch % opt.save_epoch_freq == 0:  # cache our model every <save_epoch_freq> epochs

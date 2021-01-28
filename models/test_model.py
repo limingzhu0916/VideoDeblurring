@@ -19,7 +19,7 @@ class TestModel(BaseModel):
 
         which_epoch = opt.which_epoch
         self.model_names = ['G']
-        self.load_networks(which_epoch)
+        # self.load_networks(which_epoch)
 
         print('---------- Networks initialized -------------')
         networks.print_network(self.netG)

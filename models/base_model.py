@@ -111,6 +111,7 @@ class BaseModel():
                     del state_dict._metadata
 
                 net.load_state_dict(state_dict)
+                print('load network success')
 
 
     def save_network(self, network, network_label, epoch_label, gpu_ids):

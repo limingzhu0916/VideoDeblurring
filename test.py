@@ -20,12 +20,12 @@ def test(opt, data_loader, model):
         test_time += stop - start
         print('RunTime:%.4f' % (stop - start))
         fake, psnr, ssim = model.get_images_and_metrics()
-        util.save_image(fake, opt.results_dir)
         avgPSNR += psnr
         avgSSIM += ssim
         counter = i + 1
         img_path = model.get_image_paths()
         print('process image... %s' % img_path)
+        util.save_image(fake, opt.results_dir, img_path)
     avgPSNR /= counter
     avgSSIM /= counter
     print('PSNR = %f, SSIM = %f' % (avgPSNR, avgSSIM))
