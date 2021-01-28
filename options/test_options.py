@@ -10,7 +10,6 @@ class TestOptions(BaseOptions):
         self.parser.add_argument('--phase', type=str, default='test', help='train, val, test, etc')
         self.parser.add_argument('--which_epoch', type=str, default='latest', help='which epoch to load? set to latest to use latest cached model')
         self.parser.add_argument('--how_many', type=int, default=5000, help='how many test images to run')
-        self.parser.add_argument('--sharp_root', type=str, default='E:/GoPro_Large/test/sharp/GOPR0384_11_05/', help='saves results here.')
         self.isTrain = False
 
 

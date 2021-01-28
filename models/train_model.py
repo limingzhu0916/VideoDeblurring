@@ -18,7 +18,7 @@ class TrainModel(BaseModel):
         # define tensors
         self.input_sharp = self.Tensor(opt.batchSize, opt.input_nc, opt.fineSize, opt.fineSize)
         self.input_blur = self.Tensor(opt.batchSize, opt.output_nc, opt.fineSize, opt.fineSize)
-        # self.input_V = self.Tensor(opt.batchSize, opt.input_nc, opt.fineSize, opt.fineSize)
+        self.input_V = self.Tensor(opt.batchSize, opt.input_nc, opt.fineSize, opt.fineSize)
 
         self.loss_names = ['G_GAN', 'G_Content', 'D']
         self.visual_names = ['real_A', 'fake_B', 'real_B']
@@ -121,3 +121,18 @@ class TrainModel(BaseModel):
         ssim = SSIM(fake, real, multichannel=True)
         vis_img = np.hstack((inp, fake, real))
         return psnr, ssim, vis_img
+
+    def test_validation(self, input):
+        input_blur = input['blurred']
+        self.input_V.resize_(input_blur.size()).copy_(input_blur)
+        self.input_sharp_V = input['sharp']
+
+        with torch.no_grad():
+            self.real_A = Variable(self.input_V)
+            self.fake_B = self.netG.forward(self.real_A)
+
+        fake = util.tensor2im(self.fake_B.data)[:720, :, :]
+        real = util.tensor2im(self.input_sharp_V)
+        psnr = calculate_psnr(fake, real)
+        ssim = SSIM(fake, real, multichannel=True)
+        return psnr, ssim

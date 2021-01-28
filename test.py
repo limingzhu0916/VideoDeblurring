@@ -7,7 +7,6 @@ from util import util
 def test(opt, data_loader, model):
     dataset = data_loader.load_data()
     test_time = 0.0
-    iteration = 0.0
     avgPSNR = 0.0
     avgSSIM = 0.0
     counter = 0
@@ -19,7 +18,7 @@ def test(opt, data_loader, model):
         model.test()
         stop = time.time()
         test_time += stop - start
-        print('RunTime:%.4f' % (stop - start), '  Average Runtime:%.4f' % (test_time / (iteration + 1)))
+        print('RunTime:%.4f' % (stop - start))
         fake, psnr, ssim = model.get_images_and_metrics()
         util.save_image(fake, opt.results_dir)
         avgPSNR += psnr
@@ -30,7 +29,7 @@ def test(opt, data_loader, model):
     avgPSNR /= counter
     avgSSIM /= counter
     print('PSNR = %f, SSIM = %f' % (avgPSNR, avgSSIM))
-
+    print('Average Runtime:%.4f' % (test_time / counter))
 
 if __name__ == '__main__':
     opt = TestOptions().parse()

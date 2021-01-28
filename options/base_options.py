@@ -13,7 +13,9 @@ class BaseOptions():
 
     def initialize(self):
         # basic parameters
-        self.parser.add_argument('--data_root', type=str, default="E:/GoPro_Large/sharp/GOPR0384_11_05", help='path to selected sharp frames')
+        self.parser.add_argument('--data_root', type=str, default="E:/GoPro_Large/sharp/GOPR0384_11_05", help='path to save selected sharp frames')
+        self.parser.add_argument('--video_root', type=str, default="E:/GoPro_Large/test/blur/GOPR0384_11_05", help='path to blurry video sequences')
+        self.parser.add_argument('--sharp_root', type=str, default="E:/GoPro_Large/test/sharp/GOPR0384_11_05", help='path to the sharp video sequences')
         self.parser.add_argument('--fineSize', type=int, default=256, help='crop image to this size')
         self.parser.add_argument('--norm', type=str, default='instance', help='instance normalization or batch normalization')
         self.parser.add_argument('--which_model_netD', type=str, default='n_layers', help='selects model to use for netD. [basic|n_layers]')
@@ -33,6 +35,7 @@ class BaseOptions():
                                  help='name of the experiment. It decides where to store samples and models')
         self.parser.add_argument('--dataset_mode', type=str, default='train',
                                  help='chooses how datasets are loaded. [train | test]')
+        self.parser.add_argument('--use_validation', action='store_false', help='if true, use validation')
         self.parser.add_argument('--checkpoints_dir', type=str, default="./checkpoints/", help='models are saved here')
         self.parser.add_argument('--nThreads', default=2, type=int, help='# threads for loading data')
         self.parser.add_argument('--model', type=str, default='content_gan', help='chooses which model to use. content_gan, test')

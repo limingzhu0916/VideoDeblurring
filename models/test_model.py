@@ -42,7 +42,8 @@ class TestModel(BaseModel):
         return self.image_paths
 
     def get_images_and_metrics(self):
-        fake = util.tensor2im(self.fake_B.data)
-        psnr = calculate_psnr(fake, self.input_sharp)
-        ssim = SSIM(fake, self.input_sharp, multichannel=True)
+        fake = util.tensor2im(self.fake_B.data)[:720, :, :]
+        real = util.tensor2im(self.input_sharp)
+        psnr = calculate_psnr(fake, real)
+        ssim = SSIM(fake, real, multichannel=True)
         return fake, psnr, ssim

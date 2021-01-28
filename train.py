@@ -6,10 +6,9 @@ from util.metric_counter import MetricCounter
 from multiprocessing import freeze_support
 
 def train(opt, data_loader, model, visualizer):
-    dataset = data_loader.load_data()
+    dataset, validation = data_loader.load_data()
     dataset_size = len(data_loader)
     print('The number of training images = %d' % dataset_size)
-
     total_steps = 0
     for epoch in range(opt.epoch_count, opt.niter + opt.niter_decay + 1):
         epoch_start_time = time.time()
@@ -28,8 +27,15 @@ def train(opt, data_loader, model, visualizer):
             if i == 1:
                 visualizer.add_image(img_for_vis, tag='train')  # display images on tensorboard
             visualizer.add_metrics(curr_psnr, curr_ssim)
-
         visualizer.write_to_tensorboard(epoch)
+
+        if epoch % opt.validation_freq == 0:
+            print('Testing.....')
+            for i, data in enumerate(validation):
+                val_psnr, val_ssim = model.test_validation(data)
+                visualizer.add_metrics(val_psnr, val_ssim)
+            visualizer.write_to_tensorboard(epoch, validation=True)
+
         model.save_networks('latest')
         if epoch % opt.save_epoch_freq == 0:  # cache our model every <save_epoch_freq> epochs
             print('saving the model at the end of epoch %d, iters %d' % (epoch, total_steps))
@@ -48,8 +54,3 @@ if __name__ == '__main__':
     model = create_model(opt)
     visualizer = MetricCounter(opt.name)
     train(opt, data_loader, model, visualizer)
-
-
-
-
-
