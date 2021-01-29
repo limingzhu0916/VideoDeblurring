@@ -14,6 +14,7 @@ class TrainDataset(BaseDataset):
         self.data_paths = sorted(make_dataset(opt.data_root))
         self.gamma = 2.2
         self.kernel_size = opt.kernel_size
+        self.kernel = np.load(opt.kernel_path).item()
 
     def __getitem__(self, index):
         """
@@ -28,7 +29,9 @@ class TrainDataset(BaseDataset):
 
         init_angle = np.math.floor(np.random.uniform(0, 180))
         init_length = np.math.floor(np.random.uniform(0, self.kernel_size - 2))  # length=self.kernel_size will out of index, because of sub_pixel interpolation
-        kernel = generate_kernel_trajectory(kernel_size=self.kernel_size, init_angle=init_angle, length=init_length)
+        # kernel = generate_kernel_trajectory(kernel_size=self.kernel_size, init_angle=init_angle, length=init_length)
+        kernel_name = 'angle_%s_length_%s' % (init_angle, init_length)
+        kernel = self.kernel[kernel_name]
         delta = (self.opt.fineSize - self.kernel_size) // 2
         tmp_kernel = np.pad(kernel, (delta, delta + 1), 'constant')  # pad the kernel to 256 × 256
 

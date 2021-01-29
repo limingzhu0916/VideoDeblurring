@@ -19,4 +19,5 @@ class TrainOptions(BaseOptions):
         self.parser.add_argument('--lr_D', type=float, default=0.0001, help='initial learning rate for adam')
         self.parser.add_argument('--pool_size', type=int, default=50,
                                  help='the size of image buffer that stores previously generated images')
+        self.parser.add_argument('--kernel_path', type=str, default="./dataset/kernels_41/kernel.npy", help='path to save selected sharp frames')
         self.isTrain = True

@@ -4,6 +4,8 @@ from data.data_loader import CreateDataLoader
 from models.model import create_model
 from util.metric_counter import MetricCounter
 from multiprocessing import freeze_support
+import os
+os.environ['KMP_DUPLICATE_LIB_OK']='True'
 
 def train(opt, data_loader, model, visualizer):
     dataset, validation = data_loader.load_data()
