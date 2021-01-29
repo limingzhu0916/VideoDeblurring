@@ -1,5 +1,7 @@
 import matplotlib.pyplot as plt
+import os
 import numpy as np
+from util import util
 
 def __plot_kernels(kernel, show, save, path_to_save):
     """
@@ -34,7 +36,7 @@ def generate_all_kernel_trajectory(kernel_size, angle, path_to_save, show=False,
     """
     Generate all blur kernel M, the blur kernel is symmetric and linear. M can be represent
     by a motion vector m=(l, o), the length of the motion vector l ∈ (0, kernel_size),
-    the orientation of the motion vector o ∈ [0, angle)
+    the orientation of the motion vector o ∈ [0, angle), save all the kernel to disk
     :param kernel_size: default 21, 31, 41
     :param angle: default 180
     :param show: Whether to show kernel, default False
@@ -43,7 +45,8 @@ def generate_all_kernel_trajectory(kernel_size, angle, path_to_save, show=False,
     :return: vector of motion applying sub-pixel interpolation
     """
     u0 = v0 = kernel_size / 2
-    for init_angle in range(0, angle, 10):
+    dic = {}
+    for init_angle in range(0, angle):
         cos = np.cos(np.deg2rad(init_angle))
         step = 0.5
         iteration = 0
@@ -66,8 +69,12 @@ def generate_all_kernel_trajectory(kernel_size, angle, path_to_save, show=False,
                 step += 0.5
                 iteration += 1
             sub_kernel = SubPixel_interpoaltion(kernel_size, kernel)
+            kernel_name = 'angle_%s_length_%s' % (init_angle, length)
+            dic.setdefault(kernel_name, sub_kernel)
 
-            __plot_kernels(sub_kernel, show=show, save=save, path_to_save=path_to_save)
+            # __plot_kernels(sub_kernel, show=show, save=save, path_to_save=path_to_save)
+    util.mkdirs(path_to_save)
+    np.save(os.path.join(path_to_save, 'kernel.npy'), dic)
 
 def generate_kernel_trajectory(kernel_size, init_angle, length):
     u0 = v0 = kernel_size / 2
@@ -125,6 +132,6 @@ def SubPixel_interpoaltion(kernel_size, kernel):
     return sub_kernel
 
 if __name__ == '__main__':
-    kernel_size = 21
+    kernel_size = 31
     angle = 180
-    generate_all_kernel_trajectory(kernel_size, angle, path_to_save='./kernels', show=False, save=False)
+    generate_all_kernel_trajectory(kernel_size, angle, path_to_save='./kernels_31', show=False, save=False)
