@@ -65,10 +65,11 @@ def generate_all_kernel_trajectory(kernel_size, angle, path_to_save, show=False,
                 v_right = v0 + trajectory_fun(du)
                 u_left = u0 - du
                 v_left = v0 - trajectory_fun(du)
-                kernel = np.append(kernel, np.array([complex(real=u_right, imag=v_right), complex(real=u_left, imag=v_left)]))
+                kernel = np.append(kernel,
+                                   np.array([complex(real=u_right, imag=v_right), complex(real=u_left, imag=v_left)]))
                 step += 0.5
                 iteration += 1
-            sub_kernel = SubPixel_interpoaltion(kernel_size, kernel)
+                sub_kernel = SubPixel_interpoaltion(kernel_size, kernel)
             kernel_name = 'angle_%s_length_%s' % (init_angle, length)
             dic.setdefault(kernel_name, sub_kernel)
 
@@ -132,6 +133,6 @@ def SubPixel_interpoaltion(kernel_size, kernel):
     return sub_kernel
 
 if __name__ == '__main__':
-    kernel_size = 31
+    kernel_size = 21
     angle = 180
-    generate_all_kernel_trajectory(kernel_size, angle, path_to_save='./kernels_31', show=False, save=False)
+    generate_all_kernel_trajectory(kernel_size, angle, path_to_save='./kernels_21', show=False, save=False)

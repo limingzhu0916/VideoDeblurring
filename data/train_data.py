@@ -28,25 +28,28 @@ class TrainDataset(BaseDataset):
         sharp_patch = cv2.normalize(sharp_patch, sharp_patch, alpha=-1, beta=1, norm_type=cv2.NORM_MINMAX, dtype=cv2.CV_32F)
 
         init_angle = np.math.floor(np.random.uniform(0, 180))
-        init_length = np.math.floor(np.random.uniform(1, self.kernel_size - 2))  # length=self.kernel_size will out of index, because of sub_pixel interpolation
+        init_length = np.math.floor(np.random.uniform(0, self.kernel_size - 2))  # length=self.kernel_size will out of index, because of sub_pixel interpolation
         # kernel = generate_kernel_trajectory(kernel_size=self.kernel_size, init_angle=init_angle, length=init_length)
-        kernel_name = 'angle_%s_length_%s' % (init_angle, init_length)
-        kernel = self.kernel[kernel_name]
-        delta = (self.opt.fineSize - self.kernel_size) // 2
-        tmp_kernel = np.pad(kernel, (delta, delta + 1), 'constant')  # pad the kernel to 256 × 256
+        if init_length == 0:
+            blurred = copy.deepcopy(sharp_patch)
+        else:
+            kernel_name = 'angle_%s_length_%s' % (init_angle, init_length)
+            kernel = self.kernel[kernel_name]
+            delta = (self.opt.fineSize - self.kernel_size) // 2
+            tmp_kernel = np.pad(kernel, (delta, delta + 1), 'constant')  # pad the kernel to 256 × 256
 
-        # patch_gamma = np.sign(sharp_patch) * (np.abs(sharp_patch)) ** self.gamma
-        # patch_gamma[:, :, 0] = np.array(signal.fftconvolve(patch_gamma[:, :, 0], tmp_kernel, 'same'))
-        # patch_gamma[:, :, 1] = np.array(signal.fftconvolve(patch_gamma[:, :, 1], tmp_kernel, 'same'))
-        # patch_gamma[:, :, 2] = np.array(signal.fftconvolve(patch_gamma[:, :, 2], tmp_kernel, 'same'))
-        # blur_patch = np.sign(patch_gamma) * (np.abs(patch_gamma)) ** (1 / self.gamma)
+            # patch_gamma = np.sign(sharp_patch) * (np.abs(sharp_patch)) ** self.gamma
+            # patch_gamma[:, :, 0] = np.array(signal.fftconvolve(patch_gamma[:, :, 0], tmp_kernel, 'same'))
+            # patch_gamma[:, :, 1] = np.array(signal.fftconvolve(patch_gamma[:, :, 1], tmp_kernel, 'same'))
+            # patch_gamma[:, :, 2] = np.array(signal.fftconvolve(patch_gamma[:, :, 2], tmp_kernel, 'same'))
+            # blur_patch = np.sign(patch_gamma) * (np.abs(patch_gamma)) ** (1 / self.gamma)
 
-        patch = copy.deepcopy(sharp_patch)
-        patch[:, :, 0] = np.array(signal.fftconvolve(patch[:, :, 0], tmp_kernel, 'same'))
-        patch[:, :, 1] = np.array(signal.fftconvolve(patch[:, :, 1], tmp_kernel, 'same'))
-        patch[:, :, 2] = np.array(signal.fftconvolve(patch[:, :, 2], tmp_kernel, 'same'))
+            patch = copy.deepcopy(sharp_patch)
+            patch[:, :, 0] = np.array(signal.fftconvolve(patch[:, :, 0], tmp_kernel, 'same'))
+            patch[:, :, 1] = np.array(signal.fftconvolve(patch[:, :, 1], tmp_kernel, 'same'))
+            patch[:, :, 2] = np.array(signal.fftconvolve(patch[:, :, 2], tmp_kernel, 'same'))
 
-        blurred = cv2.normalize(patch, patch, alpha=-1, beta=1, norm_type=cv2.NORM_MINMAX, dtype=cv2.CV_32F)
+            blurred = cv2.normalize(patch, patch, alpha=-1, beta=1, norm_type=cv2.NORM_MINMAX, dtype=cv2.CV_32F)
 
         sharp_patch = np.transpose(sharp_patch, (2, 0, 1))
         blurred = np.transpose(blurred, (2, 0, 1))

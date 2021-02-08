@@ -164,11 +164,7 @@ class UnetGenerator(nn.Module):
 
     def forward(self, input):
         """Standard forward"""
-        if isinstance(input.data, torch.cuda.FloatTensor):
-            output = nn.parallel.data_parallel(self.model, input, self.gpu_ids)
-        else:
-            output = self.model(input)
-        return output
+        return self.model(input)
 
 class UnetSkipConnectionBlock(nn.Module):
     def __init__(self, outer_nc, inner_nc, input_nc=None, submodule=None, outermost=False, innermost=False, norm_layer=nn.BatchNorm2d, use_dropout=False):

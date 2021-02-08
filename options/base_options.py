@@ -13,7 +13,7 @@ class BaseOptions():
 
     def initialize(self):
         # basic parameters
-        self.parser.add_argument('--data_root', type=str, default="E:/GoPro_Large/sharp/GOPR0384_11_05", help='path to save selected sharp frames')
+        self.parser.add_argument('--data_root', type=str, default="E:/VideoDeblur/low_light_blur/low_light_sharp", help='path to save selected sharp frames')
         self.parser.add_argument('--video_root', type=str, default="E:/GoPro_Large/test/blur/GOPR0384_11_05", help='path to blurry video sequences')
         self.parser.add_argument('--sharp_root', type=str, default="E:/GoPro_Large/test/sharp/GOPR0384_11_05", help='path to the sharp video sequences')
         self.parser.add_argument('--fineSize', type=int, default=256, help='crop image to this size')
@@ -39,7 +39,7 @@ class BaseOptions():
         self.parser.add_argument('--checkpoints_dir', type=str, default="./checkpoints/", help='models are saved here')
         self.parser.add_argument('--nThreads', default=2, type=int, help='# threads for loading data')
         self.parser.add_argument('--model', type=str, default='content_gan', help='chooses which model to use. content_gan, test')
-        self.parser.add_argument('--kernel_size', type=int, default=41, help='the size of kernel [21 | 31 | 41]')
+        self.parser.add_argument('--kernel_size', type=int, default=21, help='the size of kernel [21 | 31 | 41]')
         self.parser.add_argument('--serial_batches', action='store_true',
                                  help='if true, takes images in order to make batches, otherwise takes them randomly')
         self.parser.add_argument('--max_dataset_size', type=int, default=float("inf"),

@@ -7,6 +7,7 @@ import numpy as np
 from util.metrics import calculate_psnr
 from skimage.metrics import structural_similarity as SSIM
 from util import util
+import os
 
 
 class TrainModel(BaseModel):
@@ -23,6 +24,7 @@ class TrainModel(BaseModel):
         self.loss_names = ['G_GAN', 'G_Content', 'D']
         self.visual_names = ['real_A', 'fake_B', 'real_B']
         self.model_names = ['G', 'D']
+        self.save_blur_dir = os.path.join(self.save_dir, 'blur_path_for_train')
 
         # define networks (both generator and discriminator)
         self.netG = networks.define_G(opt.input_nc, opt.output_nc, opt.ngf, opt.which_model_netG, opt.norm, not opt.no_dropout, opt.init_type, opt.init_gain, self.gpu_ids)
@@ -120,6 +122,7 @@ class TrainModel(BaseModel):
         psnr = calculate_psnr(fake, real)
         ssim = SSIM(fake, real, multichannel=True)
         vis_img = np.hstack((inp, fake, real))
+        util.save_image(inp, self.save_blur_dir, self.image_paths)
         return psnr, ssim, vis_img
 
     def test_validation(self, input):
